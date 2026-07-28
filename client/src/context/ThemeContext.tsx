@@ -1,0 +1,42 @@
+import { createContext, useEffect, useMemo, useState, ReactNode } from "react";
+
+type ThemeMode = "light" | "dark";
+
+interface ThemeContextType {
+  mode: ThemeMode;
+  toggleTheme: () => void;
+}
+
+export const ThemeContext = createContext<ThemeContextType | null>(null);
+
+interface ThemeProviderProps {
+  children: ReactNode;
+}
+
+export function ThemeProvider({ children }: ThemeProviderProps) {
+  const [mode, setMode] = useState<ThemeMode>(() => {
+    return (localStorage.getItem("theme") as ThemeMode) ?? "light";
+  });
+
+  useEffect(() => {
+    document.documentElement.classList.toggle("dark", mode === "dark");
+
+    localStorage.setItem("theme", mode);
+  }, [mode]);
+
+  const toggleTheme = () => {
+    setMode((prev) => (prev === "light" ? "dark" : "light"));
+  };
+
+  const value = useMemo(
+    () => ({
+      mode,
+      toggleTheme,
+    }),
+    [mode],
+  );
+
+  return (
+    <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
+  );
+}
