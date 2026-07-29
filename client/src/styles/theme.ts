@@ -1,36 +1,28 @@
-export const theme = {
+export const styles = {
   layout: {
-    page: "min-h-screen bg-background text-foreground",
-
+    page: "min-h-screen",
     container: "mx-auto w-full max-w-7xl px-6",
   },
 
   typography: {
     h1: "text-4xl font-semibold tracking-tight",
-
-    h2: "text-2xl font-semibold",
-
-    body: "text-base",
-
+    h2: "text-2xl font-semibold tracking-tight",
+    body: "text-base leading-7",
     small: "text-sm",
-
     label: "text-sm font-medium",
   },
 
   components: {
-    card:
-      "rounded-lg border border-border bg-surface shadow-md",
+    card: "rounded-[var(--radius-lg)] border p-8",
 
     input:
-      "h-14 w-full rounded-md border border-border bg-surface px-5 outline-none transition-all duration-200 focus:border-primary focus:ring-4 focus:ring-green-100",
+      "h-14 w-full rounded-[var(--radius-md)] border px-5 outline-none",
 
     button:
-      "flex h-14 w-full items-center justify-center rounded-md bg-primary font-medium text-white transition-all duration-200 hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60",
+      "flex h-14 w-full items-center justify-center rounded-[var(--radius-md)] font-medium",
 
-    link:
-      "font-medium text-primary hover:underline",
+    link: "font-medium hover:underline",
 
-    alert:
-      "rounded-md border border-danger/20 bg-danger/10 px-4 py-3 text-sm text-danger",
+    alert: "rounded-[var(--radius-md)] border px-4 py-3",
   },
 };

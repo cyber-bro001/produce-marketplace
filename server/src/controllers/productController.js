@@ -1,9 +1,10 @@
 const Product = require("../models/Product");
 
-async function createProduct(req, res) {
+const createProduct = async (req, res) => {
   try {
-    const { name, description, category, price, unit, quantity, image } =
-      req.body;
+    const { name, description, category, price, unit, quantity } = req.body;
+
+    const image = req.file ? `/uploads/${req.file.filename}` : "";
 
     if (!name || !description || !category || !price || !unit || !quantity) {
       return res.status(400).json({
@@ -36,7 +37,7 @@ async function createProduct(req, res) {
       message: "Server Error",
     });
   }
-}
+};
 
 const getProducts = async (req, res) => {
   try {
@@ -44,7 +45,7 @@ const getProducts = async (req, res) => {
       .populate("seller", "name email phone")
       .sort({ createdAt: -1 });
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       count: products.length,
       products,
@@ -52,7 +53,7 @@ const getProducts = async (req, res) => {
   } catch (error) {
     console.error(error);
 
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Server Error",
     });
@@ -98,17 +99,22 @@ const updateProduct = async (req, res) => {
       });
     }
 
-    // Check ownership
     if (product.seller.toString() !== req.user._id.toString()) {
       return res.status(403).json({
         success: false,
-        message: "You are not authorized to update this product.",
+        message: "Not authorized.",
       });
+    }
+
+    const updates = { ...req.body };
+
+    if (req.file) {
+      updates.image = `/uploads/${req.file.filename}`;
     }
 
     const updatedProduct = await Product.findByIdAndUpdate(
       req.params.id,
-      req.body,
+      updates,
       {
         new: true,
         runValidators: true,
@@ -141,11 +147,10 @@ const deleteProduct = async (req, res) => {
       });
     }
 
-    // Check ownership
     if (product.seller.toString() !== req.user._id.toString()) {
       return res.status(403).json({
         success: false,
-        message: "You are not authorized to delete this product.",
+        message: "Not authorized.",
       });
     }
 

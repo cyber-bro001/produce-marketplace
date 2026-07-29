@@ -1,6 +1,12 @@
-import { createContext, useEffect, useMemo, useState, ReactNode } from "react";
+import {
+  createContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
 
-type ThemeMode = "light" | "dark";
+export type ThemeMode = "light" | "dark";
 
 interface ThemeContextType {
   mode: ThemeMode;
@@ -15,12 +21,17 @@ interface ThemeProviderProps {
 
 export function ThemeProvider({ children }: ThemeProviderProps) {
   const [mode, setMode] = useState<ThemeMode>(() => {
-    return (localStorage.getItem("theme") as ThemeMode) ?? "light";
+    const savedTheme = localStorage.getItem("theme") as ThemeMode | null;
+
+    if (savedTheme) return savedTheme;
+
+    return window.matchMedia("(prefers-color-scheme: dark)").matches
+      ? "dark"
+      : "light";
   });
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", mode === "dark");
-
     localStorage.setItem("theme", mode);
   }, [mode]);
 
@@ -33,10 +44,12 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
       mode,
       toggleTheme,
     }),
-    [mode],
+    [mode]
   );
 
   return (
-    <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
+    <ThemeContext.Provider value={value}>
+      {children}
+    </ThemeContext.Provider>
   );
 }

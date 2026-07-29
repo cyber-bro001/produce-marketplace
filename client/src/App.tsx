@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useTheme } from "./context/useTheme";
+import { styles } from "./styles";
 
 import Home from "./pages/Home";
 import Login from "./pages/Login";
@@ -15,7 +16,13 @@ const App = () => {
   useTheme();
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div
+      className={styles.layout.page}
+      style={{
+        backgroundColor: "var(--background)",
+        color: "var(--foreground)",
+      }}
+    >
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Home />} />
