@@ -10,12 +10,19 @@ import Button from "../components/ui/Button";
 import LoadingSpinner from "../components/LoadingSpinner";
 import { formatPrice } from "../utils/format";
 
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL =
+  import.meta.env.VITE_API_URL || "http://localhost:3000/api";
+
+const SERVER_URL = API_URL.replace(/\/api$/, "");
 
 function getImageUrl(path: string) {
   if (!path) return "";
-  if (path.startsWith("http")) return path;
-  return `${API_URL}${path}`;
+
+  if (path.startsWith("http")) {
+    return path;
+  }
+
+  return `${SERVER_URL}${path}`;
 }
 
 function ProductDetails() {

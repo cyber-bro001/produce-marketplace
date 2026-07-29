@@ -9,7 +9,9 @@ interface ProductCardProps {
 }
 
 const API_URL =
-  import.meta.env.VITE_API_URL || "http://localhost:3000";
+  import.meta.env.VITE_API_URL || "http://localhost:3000/api";
+
+const SERVER_URL = API_URL.replace(/\/api$/, "");
 
 function getImageUrl(path: string) {
   if (!path) return "";
@@ -18,7 +20,7 @@ function getImageUrl(path: string) {
     return path;
   }
 
-  return `${API_URL}${path}`;
+  return `${SERVER_URL}${path}`;
 }
 
 function ProductCard({ product }: ProductCardProps) {
