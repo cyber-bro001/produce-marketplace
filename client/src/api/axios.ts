@@ -1,15 +1,13 @@
 ﻿import axios from "axios";
 
 const api = axios.create({
-  baseURL: "/api",
-  // Do not set a global Content-Type; let axios/browser set it per-request (FormData needs multipart).
+  baseURL: import.meta.env.VITE_API_URL,
 });
 
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
 
   if (token) {
-    config.headers = config.headers || {};
     config.headers.Authorization = `Bearer ${token}`;
   }
 
