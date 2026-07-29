@@ -8,17 +8,15 @@ const {
   deleteProduct,
 } = require("../controllers/productController");
 
-const {
-  protect,
-  sellerOnly,
-} = require("../middlewares/authMiddleware");
+const { protect, sellerOnly } = require("../middlewares/authMiddleware");
+const validate = require("../middlewares/validate");
+const { productRules, updateProductRules } = require("../validators/productValidators");
 
 const upload = require("../middlewares/upload");
 
 const router = express.Router();
 
-router.get("/", getProducts);
-
+router.get("/",    getProducts);
 router.get("/:id", getProductById);
 
 router.post(
@@ -26,7 +24,9 @@ router.post(
   protect,
   sellerOnly,
   upload.single("image"),
-  createProduct
+  productRules,
+  validate,
+  createProduct,
 );
 
 router.put(
@@ -34,14 +34,11 @@ router.put(
   protect,
   sellerOnly,
   upload.single("image"),
-  updateProduct
+  updateProductRules,
+  validate,
+  updateProduct,
 );
 
-router.delete(
-  "/:id",
-  protect,
-  sellerOnly,
-  deleteProduct
-);
+router.delete("/:id", protect, sellerOnly, deleteProduct);
 
 module.exports = router;
