@@ -1,20 +1,19 @@
-import axios from "axios";
+﻿import axios from "axios";
 
 const api = axios.create({
-    baseURL: "/api",
-    headers: {
-        "Content-Type": "application/json",
-    },
+  baseURL: "/api",
+  // Do not set a global Content-Type; let axios/browser set it per-request (FormData needs multipart).
 });
 
 api.interceptors.request.use((config) => {
-    const token = localStorage.getItem("token");
+  const token = localStorage.getItem("token");
 
-    if(token){
-        config.headers.Authorization = `Bearer ${token}`;
-    }
+  if (token) {
+    config.headers = config.headers || {};
+    config.headers.Authorization = `Bearer ${token}`;
+  }
 
-    return config;
+  return config;
 });
 
 export default api;

@@ -39,9 +39,12 @@ function Home() {
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-12">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold sm:text-4xl">Fresh Produce</h1>
-        <p className="mt-1 text-sm sm:text-base" style={{ color: "var(--muted)" }}>
-          Buy fresh farm produce directly from trusted sellers.
+        <h1 className="text-3xl font-bold sm:text-4xl">Ketlam</h1>
+        <p
+          className="mt-1 text-sm sm:text-base"
+          style={{ color: "var(--muted)" }}
+        >
+          Buy fresh farm produce and foodstuffs directly from trusted sellers.
         </p>
       </div>
 

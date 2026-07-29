@@ -10,7 +10,7 @@ import Button from "../components/ui/Button";
 import LoadingSpinner from "../components/LoadingSpinner";
 import { formatPrice } from "../utils/format";
 
-const API_URL = import.meta.env.VITE_API_URL || "";
+const API_URL = import.meta.env.VITE_API_URL;
 
 function getImageUrl(path: string) {
   if (!path) return "";
@@ -119,7 +119,10 @@ function ProductDetails() {
           </div>
 
           <div>
-            <p className="text-4xl font-bold" style={{ color: "var(--primary)" }}>
+            <p
+              className="text-4xl font-bold"
+              style={{ color: "var(--primary)" }}
+            >
               {formatPrice(product.price)}
             </p>
             <p className="text-sm" style={{ color: "var(--muted)" }}>
@@ -130,7 +133,9 @@ function ProductDetails() {
           <div className="space-y-1 text-sm">
             <p>
               <span style={{ color: "var(--muted)" }}>Stock: </span>
-              <span className="font-medium">{product.quantity} {product.unit}(s) available</span>
+              <span className="font-medium">
+                {product.quantity} {product.unit}(s) available
+              </span>
             </p>
             <p>
               <span style={{ color: "var(--muted)" }}>Seller: </span>
@@ -198,7 +203,10 @@ function ProductDetails() {
           )}
 
           {isAuthenticated && !product.availability && (
-            <p className="text-sm font-medium" style={{ color: "var(--danger)" }}>
+            <p
+              className="text-sm font-medium"
+              style={{ color: "var(--danger)" }}
+            >
               This product is currently out of stock.
             </p>
           )}

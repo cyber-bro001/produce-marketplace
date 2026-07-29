@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
-  Leaf,
   ShoppingCart,
   Menu,
   X,
@@ -30,14 +29,30 @@ function Navbar() {
   const close = () => setMenuOpen(false);
 
   const buyerLinks = [
-    { to: "/buyer/orders", label: "My Orders", icon: <ClipboardList size={16} /> },
+    {
+      to: "/buyer/orders",
+      label: "My Orders",
+      icon: <ClipboardList size={16} />,
+    },
     { to: "/profile", label: "Profile", icon: <User size={16} /> },
   ];
 
   const sellerLinks = [
-    { to: "/dashboard", label: "Dashboard", icon: <LayoutDashboard size={16} /> },
-    { to: "/seller/products", label: "My Products", icon: <Package size={16} /> },
-    { to: "/seller/orders", label: "Orders", icon: <ClipboardList size={16} /> },
+    {
+      to: "/dashboard",
+      label: "Dashboard",
+      icon: <LayoutDashboard size={16} />,
+    },
+    {
+      to: "/seller/products",
+      label: "My Products",
+      icon: <Package size={16} />,
+    },
+    {
+      to: "/seller/orders",
+      label: "Orders",
+      icon: <ClipboardList size={16} />,
+    },
     { to: "/profile", label: "Profile", icon: <User size={16} /> },
   ];
 
@@ -59,8 +74,7 @@ function Navbar() {
           className="flex items-center gap-2 font-bold text-lg"
           style={{ color: "var(--primary)" }}
         >
-          <Leaf size={22} />
-          <span>ProduceMarket</span>
+          <span>Ketlam</span>
         </Link>
 
         {/* Desktop links */}

@@ -17,7 +17,7 @@ function Cart() {
         <h1 className="mb-8 text-3xl font-bold">Your Cart</h1>
         <EmptyState
           title="Your cart is empty"
-          message="Browse the marketplace and add some fresh produce."
+          message="Browse the marketplace and add some fresh produce or food items."
           actionLabel="Browse Products"
           onAction={() => navigate("/")}
         />
