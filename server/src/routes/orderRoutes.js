@@ -7,11 +7,11 @@ const {
   updateOrderStatus,
 } = require("../controllers/orderController");
 
-const { protect, sellerOnly } = require("../middlewares/authMiddleware");
+const { protect, sellerOnly, buyerOnly } = require("../middlewares/authMiddleware");
 
 const router = express.Router();
 
-router.post("/", protect, createOrder);
+router.post("/", protect, buyerOnly, createOrder);
 
 router.get("/my-orders", protect, getMyOrders);
 

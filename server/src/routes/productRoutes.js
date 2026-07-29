@@ -33,6 +33,7 @@ router.put(
   "/:id",
   protect,
   sellerOnly,
+  upload.single("image"),
   updateProduct
 );
 

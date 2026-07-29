@@ -5,10 +5,18 @@ const createOrder = async (req, res) => {
   try {
     const { productId, quantity } = req.body;
 
+    // --- Input validation (must run before any DB write) ---
     if (!productId || !quantity) {
       return res.status(400).json({
         success: false,
         message: "Product and quantity are required.",
+      });
+    }
+
+    if (quantity <= 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Quantity must be greater than zero.",
       });
     }
 
@@ -21,33 +29,11 @@ const createOrder = async (req, res) => {
       });
     }
 
-    if (quantity > product.quantity) {
-      return res.status(400).json({
+    // Prevent a seller from ordering their own product
+    if (product.seller.toString() === req.user._id.toString()) {
+      return res.status(403).json({
         success: false,
-        message: "Insufficient quantity available.",
-      });
-    }
-
-    const totalPrice = quantity * product.price;
-
-    const order = await Order.create({
-      buyer: req.user._id,
-      seller: product.seller,
-      product: product._id,
-      quantity,
-      totalPrice,
-    });
-
-    product.quantity -= quantity;
-
-    if (product.quantity === 0) {
-      product.availability = false;
-    }
-
-    if (quantity <= 0) {
-      return res.status(400).json({
-        success: false,
-        message: "Quantity must be greater than zero.",
+        message: "You cannot order your own product.",
       });
     }
 
@@ -58,9 +44,35 @@ const createOrder = async (req, res) => {
       });
     }
 
-    await product.save();
+    if (quantity > product.quantity) {
+      return res.status(400).json({
+        success: false,
+        message: "Insufficient quantity available.",
+      });
+    }
 
-    res.status(201).json({
+    // --- Atomic write: create order + decrement inventory in a transaction ---
+    const session = await Order.startSession();
+    let order;
+
+    try {
+      await session.withTransaction(async () => {
+        const totalPrice = quantity * product.price;
+
+        [order] = await Order.create(
+          [{ buyer: req.user._id, seller: product.seller, product: product._id, quantity, totalPrice }],
+          { session }
+        );
+
+        product.quantity -= quantity;
+        if (product.quantity === 0) product.availability = false;
+        await product.save({ session });
+      });
+    } finally {
+      session.endSession();
+    }
+
+    return res.status(201).json({
       success: true,
       message: "Order placed successfully.",
       order,
@@ -68,7 +80,7 @@ const createOrder = async (req, res) => {
   } catch (error) {
     console.error(error);
 
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Server Error",
     });

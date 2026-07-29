@@ -41,7 +41,19 @@ const sellerOnly = (req, res, next) => {
   next();
 };
 
+const buyerOnly = (req, res, next) => {
+  if (req.user.role !== "buyer") {
+    return res.status(403).json({
+      success: false,
+      message: "Only buyers can perform this action.",
+    });
+  }
+
+  next();
+};
+
 module.exports = {
   protect,
   sellerOnly,
+  buyerOnly,
 };
