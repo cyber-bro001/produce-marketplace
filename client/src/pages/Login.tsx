@@ -1,47 +1,34 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { Eye, EyeOff } from "lucide-react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
-
-import { login } from "../api/auth";
-import Button from "../components/ui/Button";
+import { useAuth } from "../context/useAuth";
 import Input from "../components/ui/Input";
-import ThemeToggle from "../components/ThemeToggle";
-import { styles } from "../styles";
+import Button from "../components/ui/Button";
 
 function Login() {
+  const { login } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const from = (location.state as { from?: { pathname: string } })?.from?.pathname;
 
-  const [showPassword, setShowPassword] = useState(false);
-
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-
+  const [formData, setFormData] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
+    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-
     setError("");
-
-    if (!email.trim() || !password.trim()) {
-      setError("Email and password are required.");
-      return;
-    }
-
+    setLoading(true);
     try {
-      setLoading(true);
-
-      const data = await login({
-        email,
-        password,
-      });
-
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("user", JSON.stringify(data.user));
-
-      navigate("/");
+      await login(formData.email, formData.password);
+      const stored = localStorage.getItem("user");
+      const user = stored ? JSON.parse(stored) : null;
+      const dest = from || (user?.role === "seller" ? "/dashboard" : "/");
+      navigate(dest, { replace: true });
     } catch (err) {
       if (axios.isAxiosError(err)) {
         setError(err.response?.data?.message ?? "Login failed.");
@@ -54,100 +41,66 @@ function Login() {
   }
 
   return (
-    <main
-      className={`${styles.layout.page} flex items-center justify-center px-6`}
-      style={{
-        background: "var(--background)",
-      }}
+    <div
+      className="flex min-h-screen items-center justify-center px-4 py-12"
+      style={{ background: "var(--background)" }}
     >
-      <div
-        className="w-full max-w-md rounded-[var(--radius-lg)] border p-8"
-        style={{
-          background: "var(--surface)",
-          borderColor: "var(--border)",
-          boxShadow: "var(--shadow-md)",
-        }}
-      >
-        <div className="mb-8 flex justify-between items-center">
-          <div>
-            <h1 className={styles.typography.h2}>Welcome back</h1>
-
-            <p
-              className="mt-2"
-              style={{
-                color: "var(--muted)",
-              }}
-            >
-              Login to your marketplace account.
-            </p>
-          </div>
-
-          <ThemeToggle />
+      <div className="w-full max-w-md">
+        <div className="mb-8 text-center">
+          <h1 className="text-3xl font-bold">Welcome back</h1>
+          <p className="mt-1 text-sm" style={{ color: "var(--muted)" }}>
+            Sign in to your account
+          </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <Input
-            label="Email"
-            type="email"
-            placeholder="Enter your email"
-            autoComplete="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
+        <div
+          className="rounded-[var(--radius-lg)] border p-8"
+          style={{ background: "var(--surface)", borderColor: "var(--border)" }}
+        >
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <Input
+              label="Email"
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              placeholder="you@example.com"
+              required
+            />
+            <Input
+              label="Password"
+              type="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              placeholder="••••••••"
+              required
+            />
 
-          <Input
-            label="Password"
-            type={showPassword ? "text" : "password"}
-            placeholder="Enter your password"
-            autoComplete="current-password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            rightIcon={
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="cursor-pointer"
-              >
-                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-              </button>
-            }
-          />
+            {error && (
+              <p className="text-sm" style={{ color: "var(--danger)" }}>
+                {error}
+              </p>
+            )}
 
-          {error && (
-            <div
-              className={styles.components.alert}
-              style={{
-                borderColor: "var(--danger)",
-                color: "var(--danger)",
-              }}
-            >
-              {error}
-            </div>
-          )}
+            <Button type="submit" loading={loading}>
+              Sign In
+            </Button>
+          </form>
 
-          <Button type="submit" loading={loading}>
-            Login
-          </Button>
-
-          <p
-            className="text-center"
-            style={{
-              color: "var(--muted)",
-            }}
-          >
+          <p className="mt-6 text-center text-sm" style={{ color: "var(--muted)" }}>
             Don't have an account?{" "}
             <Link
               to="/register"
-              style={{
-                color: "var(--primary)",
-              }}
+              className="font-medium hover:underline"
+              style={{ color: "var(--primary)" }}
             >
               Register
             </Link>
           </p>
-        </form>
+        </div>
       </div>
-    </main>
+    </div>
   );
 }
 

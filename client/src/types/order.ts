@@ -9,4 +9,6 @@ export interface Order {
   quantity: number;
   totalPrice: number;
   status: "Pending" | "Confirmed" | "Completed" | "Cancelled";
+  createdAt: string;
+  updatedAt: string;
 }

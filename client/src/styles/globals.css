@@ -79,3 +79,7 @@ body {
     "Segoe UI",
     sans-serif;
 }
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

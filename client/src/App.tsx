@@ -1,50 +1,75 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { useTheme } from "./context/useTheme";
-import { styles } from "./styles";
+import { ThemeProvider } from "./context/ThemeContext";
+import { AuthProvider } from "./context/AuthContext";
+import { CartProvider } from "./context/CartContext";
+
+import MainLayout from "./layouts/MainLayout";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
-import SellerDashboard from "./pages/SellerDashboard";
-import BuyerOrders from "./pages/BuyerOrders";
-import SellerOrders from "./pages/SellerOrders";
-import CreateProduct from "./pages/CreateProduct";
 import ProductDetails from "./pages/ProductDetails";
+import Cart from "./pages/Cart";
+import Checkout from "./pages/Checkout";
+import BuyerOrders from "./pages/BuyerOrders";
+import Profile from "./pages/Profile";
+import SellerDashboard from "./pages/SellerDashboard";
+import MyProducts from "./pages/MyProducts";
+import CreateProduct from "./pages/CreateProduct";
+import EditProduct from "./pages/EditProduct";
+import SellerOrders from "./pages/SellerOrders";
 import NotFound from "./pages/NotFound";
 
-const App = () => {
-  useTheme();
-
+function App() {
   return (
-    <div
-      className={styles.layout.page}
-      style={{
-        backgroundColor: "var(--background)",
-        color: "var(--foreground)",
-      }}
-    >
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Home />} />
+    <ThemeProvider>
+      <AuthProvider>
+        <CartProvider>
+          <BrowserRouter>
+            <Routes>
+              {/* Auth pages — no navbar/footer */}
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
 
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
+              {/* All other pages use MainLayout (Navbar + Footer) */}
+              <Route element={<MainLayout />}>
+                {/* Public */}
+                <Route path="/" element={<Home />} />
+                <Route path="/products/:id" element={<ProductDetails />} />
+                <Route path="/cart" element={<Cart />} />
 
-          <Route path="/products/:id" element={<ProductDetails />} />
+                {/* Any authenticated user */}
+                <Route element={<ProtectedRoute />}>
+                  <Route path="/profile" element={<Profile />} />
+                </Route>
 
-          <Route path="/dashboard" element={<SellerDashboard />} />
+                {/* Buyer only */}
+                <Route element={<ProtectedRoute role="buyer" />}>
+                  <Route path="/checkout" element={<Checkout />} />
+                  <Route path="/buyer/orders" element={<BuyerOrders />} />
+                </Route>
 
-          <Route path="/create-product" element={<CreateProduct />} />
+                {/* Seller only */}
+                <Route element={<ProtectedRoute role="seller" />}>
+                  <Route path="/dashboard" element={<SellerDashboard />} />
+                  <Route path="/seller/products" element={<MyProducts />} />
+                  <Route path="/create-product" element={<CreateProduct />} />
+                  <Route
+                    path="/seller/products/:id/edit"
+                    element={<EditProduct />}
+                  />
+                  <Route path="/seller/orders" element={<SellerOrders />} />
+                </Route>
+              </Route>
 
-          <Route path="/buyer/orders" element={<BuyerOrders />} />
-
-          <Route path="/seller/orders" element={<SellerOrders />} />
-
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </div>
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </CartProvider>
+      </AuthProvider>
+    </ThemeProvider>
   );
-};
+}
 
 export default App;

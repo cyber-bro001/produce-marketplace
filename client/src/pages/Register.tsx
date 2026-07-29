@@ -1,60 +1,39 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Eye, EyeOff } from "lucide-react";
 import axios from "axios";
-
-import { register } from "../api/auth";
-
-import Button from "../components/ui/Button";
+import { useAuth } from "../context/useAuth";
 import Input from "../components/ui/Input";
-import ThemeToggle from "../components/ThemeToggle";
-
-import { styles } from "../styles";
+import Button from "../components/ui/Button";
 
 function Register() {
+  const { register } = useAuth();
   const navigate = useNavigate();
-
-  const [showPassword, setShowPassword] = useState(false);
 
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     phone: "",
     password: "",
-    role: "buyer",
+    role: "buyer" as "buyer" | "seller",
   });
-
-  const [loading, setLoading] = useState(false);
-
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   function handleChange(
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) {
-    setFormData((prev) => ({
-      ...prev,
-      [e.target.name]: e.target.value,
-    }));
+    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   }
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-
     setError("");
-
-    const { name, email, phone, password } = formData;
-
-    if (!name || !email || !phone || !password) {
-      setError("Please fill all fields.");
-      return;
-    }
-
+    setLoading(true);
     try {
-      setLoading(true);
-
       await register(formData);
-
-      navigate("/login");
+      navigate(formData.role === "seller" ? "/dashboard" : "/", {
+        replace: true,
+      });
     } catch (err) {
       if (axios.isAxiosError(err)) {
         setError(err.response?.data?.message ?? "Registration failed.");
@@ -67,134 +46,109 @@ function Register() {
   }
 
   return (
-    <main
-      className={`${styles.layout.page} flex items-center justify-center px-6 py-10`}
-      style={{
-        background: "var(--background)",
-      }}
+    <div
+      className="flex min-h-screen items-center justify-center px-4 py-12"
+      style={{ background: "var(--background)" }}
     >
-      <div
-        className="w-full max-w-lg rounded-[var(--radius-lg)] border p-8"
-        style={{
-          background: "var(--surface)",
-          borderColor: "var(--border)",
-          boxShadow: "var(--shadow-md)",
-        }}
-      >
-        <div className="mb-8 flex items-center justify-between">
-          <div>
-            <h1 className={styles.typography.h2}>Create Account</h1>
-
-            <p
-              style={{
-                color: "var(--muted)",
-              }}
-            >
-              Join the Produce Marketplace.
-            </p>
-          </div>
-
-          <ThemeToggle />
+      <div className="w-full max-w-md">
+        <div className="mb-8 text-center">
+          <h1 className="text-3xl font-bold">Create account</h1>
+          <p className="mt-1 text-sm" style={{ color: "var(--muted)" }}>
+            Join the marketplace today
+          </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <Input
-            label="Full Name"
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-            placeholder="John Doe"
-          />
-
-          <Input
-            label="Email"
-            type="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            placeholder="example@email.com"
-          />
-
-          <Input
-            label="Phone"
-            name="phone"
-            value={formData.phone}
-            onChange={handleChange}
-            placeholder="+234..."
-          />
-
-          <Input
-            label="Password"
-            type={showPassword ? "text" : "password"}
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-            placeholder="Password"
-            rightIcon={
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-              >
-                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-              </button>
-            }
-          />
-
-          <div className="space-y-2">
-            <label className={styles.typography.label}>Role</label>
-
-            <select
-              name="role"
-              value={formData.role}
+        <div
+          className="rounded-[var(--radius-lg)] border p-8"
+          style={{ background: "var(--surface)", borderColor: "var(--border)" }}
+        >
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <Input
+              label="Full Name"
+              name="name"
+              value={formData.name}
               onChange={handleChange}
-              className={styles.components.input}
-              style={{
-                background: "var(--surface)",
-                borderColor: "var(--border)",
-                color: "var(--foreground)",
-              }}
-            >
-              <option value="buyer">Buyer</option>
+              placeholder="John Doe"
+              required
+            />
+            <Input
+              label="Email"
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              placeholder="you@example.com"
+              required
+            />
+            <Input
+              label="Phone Number"
+              type="tel"
+              name="phone"
+              value={formData.phone}
+              onChange={handleChange}
+              placeholder="08012345678"
+              required
+            />
+            <Input
+              label="Password"
+              type="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              placeholder="At least 6 characters"
+              required
+            />
 
-              <option value="seller">Seller</option>
-            </select>
-          </div>
-
-          {error && (
-            <div
-              className={styles.components.alert}
-              style={{
-                borderColor: "var(--danger)",
-                color: "var(--danger)",
-              }}
-            >
-              {error}
+            <div className="space-y-2">
+              <label
+                className="text-sm font-medium"
+                style={{ color: "var(--foreground)" }}
+              >
+                I want to
+              </label>
+              <select
+                name="role"
+                value={formData.role}
+                onChange={handleChange}
+                className="h-14 w-full rounded-[var(--radius-md)] border px-5 text-sm outline-none"
+                style={{
+                  background: "var(--surface)",
+                  borderColor: "var(--border)",
+                  color: "var(--foreground)",
+                }}
+              >
+                <option value="buyer">Buy produce</option>
+                <option value="seller">Sell produce</option>
+              </select>
             </div>
-          )}
 
-          <Button loading={loading} type="submit">
-            Create Account
-          </Button>
+            {error && (
+              <p className="text-sm" style={{ color: "var(--danger)" }}>
+                {error}
+              </p>
+            )}
+
+            <Button type="submit" loading={loading}>
+              Create Account
+            </Button>
+          </form>
 
           <p
-            className="text-center"
-            style={{
-              color: "var(--muted)",
-            }}
+            className="mt-6 text-center text-sm"
+            style={{ color: "var(--muted)" }}
           >
             Already have an account?{" "}
             <Link
               to="/login"
-              style={{
-                color: "var(--primary)",
-              }}
+              className="font-medium hover:underline"
+              style={{ color: "var(--primary)" }}
             >
-              Login
+              Sign in
             </Link>
           </p>
-        </form>
+        </div>
       </div>
-    </main>
+    </div>
   );
 }
 
