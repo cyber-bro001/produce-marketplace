@@ -181,9 +181,77 @@ const updateOrderStatus = async (req, res) => {
   }
 };
 
+const cancelOrder = async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id);
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: "Order not found.",
+      });
+    }
+
+    // Only the buyer who placed the order can cancel it
+    if (order.buyer.toString() !== req.user._id.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: "Not authorized.",
+      });
+    }
+
+    // Can only cancel a Pending order — anything else is too far along
+    if (order.status !== "Pending") {
+      return res.status(400).json({
+        success: false,
+        message: `Cannot cancel an order with status '${order.status}'.`,
+      });
+    }
+
+    // Restore inventory atomically
+    const session = await Order.startSession();
+
+    try {
+      await session.withTransaction(async () => {
+        order.status = "Cancelled";
+        await order.save({ session });
+
+        await Product.findByIdAndUpdate(
+          order.product,
+          [
+            {
+              $set: {
+                quantity: { $add: ["$quantity", order.quantity] },
+                availability: true,
+              },
+            },
+          ],
+          { session }
+        );
+      });
+    } finally {
+      session.endSession();
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Order cancelled successfully.",
+      order,
+    });
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Server Error",
+    });
+  }
+};
+
 module.exports = {
   createOrder,
   getMyOrders,
   getSellerOrders,
   updateOrderStatus,
+  cancelOrder,
 };

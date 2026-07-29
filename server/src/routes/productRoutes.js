@@ -4,6 +4,7 @@ const {
   createProduct,
   getProducts,
   getProductById,
+  getMyProducts,
   updateProduct,
   deleteProduct,
 } = require("../controllers/productController");
@@ -16,8 +17,9 @@ const upload = require("../middlewares/upload");
 
 const router = express.Router();
 
-router.get("/",    getProducts);
-router.get("/:id", getProductById);
+router.get("/",            getProducts);
+router.get("/my-products", protect, sellerOnly, getMyProducts);
+router.get("/:id",         getProductById);
 
 router.post(
   "/",
